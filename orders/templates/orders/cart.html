@@ -1,0 +1,130 @@
+{% extends 'orders/header.html' %}
+
+{% block content %}
+<div class="cartbox">
+  <div class="row justify-content-center">
+    <h2 id="cart_heading">🛒 Your Cart</h2>
+    <table class="table">
+        <thead class="thead-light">
+        <tr>
+          <th scope="col">#</th>
+          <th scope="col">Item Description</th>
+          <th scope="col">Price</th>
+          <th scope="col">Quantity</th>
+          <th scope="col">Remove</th>
+        </tr>
+        </thead>
+        <tbody id="cart_body">
+        </tbody>
+    </table>
+
+    <h3>Total: <span class="badge badge-primary" id="total"></span></h3>
+  </div>
+
+  <div class="address-container">
+    <form method="POST" >
+        {% csrf_token %}
+
+        <label for="address"><strong>Delivery Address:</strong></label>
+        <input type="text" id="address" name="address" placeholder="Enter delivery address" required>
+
+        <button type="button" class="btn btn-info" onclick="getLocation()">📍 Use My Location</button>
+
+        <input type="hidden" id="latitude" name="latitude">
+        <input type="hidden" id="longitude" name="longitude">
+        <input type="hidden" id="price" name="price" value="400"> 
+
+        <br><br>
+        <div class="ckbtn">
+            <button id="checkout_button" type="button" class="btn btn-success" onclick="startCheckout(event)">🛒 Checkout</button>
+        </div>
+    </form>
+  </div>
+</div>
+
+<script>
+    function getLocation() {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(showPosition, showError);
+        } else {
+            alert("Geolocation is not supported by this browser.");
+        }
+    }
+
+    function showPosition(position) {
+        document.getElementById("latitude").value = position.coords.latitude;
+        document.getElementById("longitude").value = position.coords.longitude;
+        alert("✅ Location retrieved: " + position.coords.latitude + ", " + position.coords.longitude);
+    }
+
+    function showError(error) {
+        switch (error.code) {
+            case error.PERMISSION_DENIED:
+                alert("❌ User denied the request for Geolocation.");
+                break;
+            case error.POSITION_UNAVAILABLE:
+                alert("❌ Location information is unavailable.");
+                break;
+            case error.TIMEOUT:
+                alert("❌ The request to get user location timed out.");
+                break;
+            case error.UNKNOWN_ERROR:
+                alert("❌ An unknown error occurred.");
+                break;
+        }
+    }
+
+    function startCheckout(event) {
+        event.preventDefault();
+    
+        const address = document.getElementById("address").value;
+        const latitude = document.getElementById("latitude").value;
+        const longitude = document.getElementById("longitude").value;
+    
+        if (!address) {
+            alert("🚫 Please enter your delivery address.");
+            return;
+        }
+    
+        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+    
+        fetch("/save-address/", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRFToken": csrfToken
+            },
+            body: JSON.stringify({
+                address: address,
+                latitude: latitude,
+                longitude: longitude
+            })
+        })
+        .then(response => response.json())
+        .then(() => {
+            const cart = localStorage.getItem('cart') || '[]';
+    
+            return fetch("/store-cart-session/", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRFToken": csrfToken
+                },
+                body: JSON.stringify({ cart: JSON.parse(cart) })
+            });
+        })
+        .then(response => {
+            if (!response.ok) throw new Error("Failed to store cart in session");
+            return response.json();
+        })
+        .then(() => {
+            window.location.href = "/pay/";
+        })
+        .catch(error => {
+            console.error("❌ Checkout failed:", error);
+            alert("❌ Checkout failed: " + error.message);
+        });
+    }
+    
+</script>
+{% endblock %}

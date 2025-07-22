@@ -1,0 +1,95 @@
+{% extends 'orders/header.html' %}
+{% load static %}
+
+{% block content %}
+
+<div class="page-wrapper">
+    <div class="content-box">
+        <h1 class="section-title">Track Your Order</h1>
+        <form method="post">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="order_id">Order ID:</label>
+                <input type="text" id="order_id" name="order_id" placeholder="Enter your Order ID" required>
+            </div>
+            <button type="submit" class="btn-primary">Track Order</button>
+        </form>
+
+    {% if error %}
+        <div class="error">{{ error }}</div>
+    {% endif %}
+
+    {% if order %}
+        <div class="status-box">
+            <strong>Status:</strong>
+            {% if status %}
+                {% if status == 'delivered' %}
+                    <span style="color: green;">Delivered</span>
+                {% elif status == 'on_way' %}
+                    <span style="color: orange;">On the way</span>
+                {% elif status == 'baking' %}
+                    <span style="color: #ff8c00;">Baking</span>
+                {% elif status == 'preparing' %}
+                    <span style="color: #1e90ff;">Preparing</span>
+                {% elif status == 'received' %}
+                    <span style="color: #6c757d;">Order Received</span>
+                {% else %}
+                    <span style="color: red;">{{ status|capfirst }}</span>
+                {% endif %}
+            {% else %}
+                <span style="color: red;">Unknown</span>
+            {% endif %}
+        </div>
+
+        <div class="order-details">
+            <p><strong>Order ID:</strong> {{ order.id }}</p>
+            <p><strong>Items:</strong> {{ order.order }}</p>
+            <p><strong>Total Price:</strong> ₹{{ order.price }}</p>
+            <p><strong>Delivery Address:</strong> {{ order.delivery_address }}</p>
+        </div>
+
+        {% if latitude and longitude %}
+            <div id="map" style="height: 400px; margin-top: 20px; border-radius: 10px; overflow: hidden;"></div>
+        {% endif %}
+    {% endif %}
+</div>
+
+{% if latitude and longitude %}
+
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine/dist/leaflet-routing-machine.css" />
+
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet-routing-machine/dist/leaflet-routing-machine.min.js"></script>
+
+    <script>
+        var map = L.map('map').setView([{{ latitude }}, {{ longitude }}], 13);
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors'
+        }).addTo(map);
+
+        var fixedStart = L.latLng(31.3260, 75.5762); 
+
+
+        var userDestination = L.latLng({{ latitude }}, {{ longitude }});
+
+        L.Routing.control({
+            waypoints: [
+                fixedStart,
+                userDestination
+            ],
+            lineOptions: {
+                styles: [{color: '#007bff', weight: 6}],  
+                addWaypoints: false,
+                extendToWaypoints: true
+            },
+            createMarker: function() { return null; },
+            routeWhileDragging: false,
+            draggableWaypoints: false,
+            fitSelectedRoutes: true,
+        }).addTo(map);
+    </script>
+{% endif %}
+
+{% endblock %}

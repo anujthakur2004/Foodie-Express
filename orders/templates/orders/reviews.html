@@ -1,0 +1,154 @@
+{% extends 'orders/header.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2 class="text-center mb-4 fw-bold">💬 Customer Reviews</h2>
+
+    <div id="reviewCarousel" class="carousel slide mb-5" data-bs-ride="carousel">
+        <div class="carousel-inner">
+            {% if new_review %}
+            <div class="carousel-item active">
+                <div class="review-card glassmorphism text-center p-5 mx-auto" style="max-width: 800px;">
+                    <img src="https://i.pravatar.cc/100?u={{ new_review.name }}" class="review-img rounded-circle mb-3" alt="User">
+                    <h5 class="fw-bold">{{ new_review.name }}</h5>
+                    <p class="text-warning fs-5">
+                        {% for i in "12345"|make_list %}
+                            {% if forloop.counter <= new_review.rating %}
+                                ★
+                            {% else %}
+                                ☆
+                            {% endif %}
+                        {% endfor %}
+                    </p>
+                    <p class="fst-italic fs-5">"{{ new_review.review_text }}"</p>
+                    <small class="text-muted">{{ new_review.created_at|date:"F j, Y" }}</small>
+                </div>
+            </div>
+            {% endif %}
+
+            {% if reviews %}
+                {% for review in reviews %}
+                <div class="carousel-item {% if not new_review and forloop.first %}active{% endif %}">
+                    <div class="review-card glassmorphism text-center p-5 mx-auto" style="max-width: 800px;">
+                        <img src="https://i.pravatar.cc/100?img={{ forloop.counter }}" class="review-img rounded-circle mb-3" alt="User">
+                        <h5 class="fw-bold">{{ review.name }}</h5>
+                        <p class="text-warning fs-5">
+                            {% for i in "12345"|make_list %}
+                                {% if forloop.counter <= review.rating %}
+                                    ★
+                                {% else %}
+                                    ☆
+                                {% endif %}
+                            {% endfor %}
+                        </p>
+                        <p class="fst-italic fs-5">"{{ review.review_text }}"</p>
+                        <small class="text-muted">{{ review.created_at|date:"F j, Y" }}</small>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="carousel-item active">
+                    <div class="text-center p-5 glassmorphism mx-auto" style="max-width: 800px;">
+                        <p class="text-muted mb-0 fs-5">No reviews yet. Be the first to leave one below! ✍️</p>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+
+        {% if reviews|length > 1 or new_review %}
+        <button class="carousel-control-prev custom-btn" type="button" data-bs-target="#reviewCarousel" data-bs-slide="prev">
+            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+        </button>
+        <button class="carousel-control-next custom-btn" type="button" data-bs-target="#reviewCarousel" data-bs-slide="next">
+            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+        </button>
+        {% endif %}
+    </div>
+
+    <div class="glassmorphism p-5 mb-5 mx-auto" style="max-width: 800px;">
+        <h4 class="text-center mb-4">Add Your Review</h4>
+        <form method="POST" action="{% url 'orders:submit_review' %}">
+            {% csrf_token %}
+            <div class="mb-4">
+                <input type="text" class="form-control form-control-lg" name="name" placeholder="Your Name" required>
+            </div>
+            <div class="mb-4">
+                <select class="form-select form-select-lg" name="rating" required>
+                    <option value="" disabled selected>Select Rating</option>
+                    <option value="5">★★★★★</option>
+                    <option value="4">★★★★☆</option>
+                    <option value="3">★★★☆☆</option>
+                    <option value="2">★★☆☆☆</option>
+                    <option value="1">★☆☆☆☆</option>
+                </select>
+            </div>
+            <div class="mb-4">
+                <textarea class="form-control form-control-lg" name="review_text" rows="4" placeholder="Your Review" required></textarea>
+            </div>
+            <div class="text-center">
+                <button type="submit" class="btn btn-primary btn-lg px-5">Submit Review</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+    .container {
+        max-width: 1000px;
+    }
+
+    .form-control, .form-select {
+        background: rgba(255, 255, 255, 0.8);
+        border: none;
+        border-radius: 12px;
+        padding: 12px 20px;
+        font-size: 1.1rem;
+    }
+
+    .btn-primary {
+        background-color: #4a6bff;
+        border: none;
+        padding: 12px 30px;
+        border-radius: 12px;
+        font-size: 1.1rem;
+        font-weight: 500;
+    }
+
+    .glassmorphism {
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 20px;
+        backdrop-filter: blur(12px);
+        box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .review-img {
+        width: 100px;
+        height: 100px;
+        object-fit: cover;
+    }
+
+    .carousel-item {
+        transition: transform 0.6s ease, opacity 0.6s ease;
+        padding: 20px 0;
+    }
+
+    .review-card {
+        width: 100%;
+    }
+
+    .carousel-control-prev, .carousel-control-next {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        background-color: rgba(0, 0, 0, 0.2);
+        top: 50%;
+        transform: translateY(-50%);
+    }
+
+    .carousel-control-prev:hover, 
+    .carousel-control-next:hover {
+        background-color: rgba(0, 0, 0, 0.4);
+    }
+</style>
+{% endblock %}

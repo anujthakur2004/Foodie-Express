@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>My Orders - Foodie Express</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+
+    <style>
+        body {
+            background-image: url('/static/images/bg2.jpg');
+            background-size: cover;
+            background-attachment: fixed;
+            background-position: center;
+            font-family: 'Segoe UI', sans-serif;
+            color: #f0f0f0;
+        }
+
+        .orders-container {
+            max-width: 95%;
+            margin: 40px auto;
+            background: rgba(0, 0, 0, 0.45);
+            backdrop-filter: blur(12px);
+            border-radius: 20px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+            padding: 30px;
+            color: #f8f9fa;
+        }
+
+        .orders-title {
+            font-size: 2rem;
+            font-weight: 600;
+            text-align: center;
+            margin-bottom: 30px;
+            position: relative;
+            color: #ffffff;
+        }
+
+        .orders-title::after {
+            content: '';
+            width: 80px;
+            height: 4px;
+            background: linear-gradient(to right, #00c6ff, #0072ff);
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            border-radius: 2px;
+        }
+
+        table {
+            background-color: rgba(255, 255, 255, 0.08);
+            color: #ffffff;
+            border-radius: 15px;
+            overflow: hidden;
+        }
+
+        thead {
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+
+        th, td {
+            padding: 15px !important;
+            vertical-align: middle !important;
+        }
+
+        tr:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .table thead th {
+            border: none;
+            color: #00c6ff;
+        }
+
+        .table td, .table th {
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        ul {
+            padding-left: 20px;
+        }
+
+        li {
+            color: #e0e0e0;
+        }
+    </style>
+</head>
+<body>
+
+    {% include 'orders/header.html' %}
+
+    <div class="orders-container">
+        <div class="orders-title">Orders by: {{ request.user }}</div>
+        <div class="table-responsive">
+            <table class="table table-hover text-white">
+                <thead>
+                    <tr>
+                        <th>Order ID</th>
+                        <th>Ordered by</th>
+                        <th>Date</th>
+                        <th>Order</th>
+                        <th>Amount Paid</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in data %}
+                        <tr class="mark-as-complete">
+                            <td>{{ row.id }}</td>
+                            <td>{{ row.username }}</td>
+                            <td>{{ row.time_of_order }}</td>
+                            <td>
+                                <ul>
+                                    {% for item in row.items_list %}
+                                        <li>{{ item }}</li>
+                                    {% endfor %}
+                                </ul>
+                            </td>
+                            <td>Rs.{{ row.price }}</td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="5" class="text-center">No orders yet.</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</body>
+</html>

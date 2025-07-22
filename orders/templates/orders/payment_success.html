@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Order Confirmation</title>
+    <style>
+        body {
+            font-family: Arial;
+            padding: 30px;
+            background-color: #f7f7f7;
+        }
+        .box {
+            background: #fff;
+            border-radius: 8px;
+            padding: 20px;
+            max-width: 600px;
+            margin: auto;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+        h2 {
+            color: #28a745;
+        }
+        ul {
+            padding-left: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="box">
+        <h2>🎉 Payment Successful!</h2>
+        <p>Thank you for your order. Here are the details:</p>
+
+        <h4>📦 Items Ordered:</h4>
+        <ul>
+            {% for item in items %}
+            <li>{{ item }}</li>
+            {% endfor %}
+        </ul>
+
+        <p><strong>💰 Total:</strong> ₹{{ total }}</p>
+        <p><strong>📍 Delivery Address:</strong> {{ address }}</p>
+
+        <br>
+        <a href="/" style="text-decoration:none; color:white; background:#28a745; padding:10px 20px; border-radius:5px;">Back to Home</a>
+    </div>
+    {% if clear_cart %}
+
+{% endif %}
+</body>
+</html>
